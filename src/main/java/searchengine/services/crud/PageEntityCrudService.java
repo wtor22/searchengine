@@ -1,7 +1,8 @@
-package searchengine.services.crudServices;
+package searchengine.services.crud;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import searchengine.dto.PageDto;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.repositories.PageEntityRepository;
@@ -9,10 +10,10 @@ import searchengine.repositories.PageEntityRepository;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class PageEntityCrudService {
 
-    private final PageEntityRepository pageEntityRepository;
+    private PageEntityRepository pageEntityRepository;
 
     public void create(PageEntity pageEntity) {
         pageEntityRepository.save(pageEntity);
@@ -24,5 +25,15 @@ public class PageEntityCrudService {
 
     public void deleteAllByListSiteEntity(List<SiteEntity> siteEntities) {
         pageEntityRepository.deleteAllBySiteEntityIn(siteEntities);
+    }
+
+    public static PageEntity mapToEntity(PageDto pageDto) {
+
+        PageEntity pageEntity = new PageEntity();
+        pageEntity.setPath(pageDto.getPath());
+        pageEntity.setCode(pageDto.getCode());
+        pageEntity.setContent(pageDto.getContent());
+
+        return pageEntity;
     }
 }

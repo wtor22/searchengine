@@ -27,11 +27,11 @@ indexing-settings:
 #      name: Лента.ру
 #    - url: https://www.playback.ru
 #      name: PlayBack.Ru
-    - url: https://ipfran.ru/
-      name: Ipfran.Ru
-    - url: https://www.svetlovka.ru/
-      name: Светловка.Ру
-#    - url: https://mpolymer.by
-#      name: МПолимер
-#    - url: https://constantaclinic.com/
-#      name: КонстантаКлиник
+#    - url: https://ipfran.ru/
+#      name: Ipfran.Ru
+#    - url: https://www.svetlovka.ru/
+#      name: Светловка.Ру
+    - url: https://mpolymer.by
+      name: МПолимер
+    - url: https://constantaclinic.com/
+      name: КонстантаКлиник

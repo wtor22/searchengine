@@ -1,4 +1,4 @@
-package searchengine.dto.crawler;
+package searchengine.dto.customResponses;
 
 import lombok.Data;
 

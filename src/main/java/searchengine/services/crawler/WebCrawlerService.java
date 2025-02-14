@@ -5,14 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
-import searchengine.model.SiteEntity;
+import searchengine.dto.PageDto;
+import searchengine.dto.SiteDto;
 import searchengine.model.Status;
-import searchengine.services.crudServices.PageEntityCrudService;
-import searchengine.services.crudServices.SiteEntityCrudService;
+import searchengine.services.crud.IndexCrudService;
+import searchengine.services.crud.LemmaEntityCrudService;
+import searchengine.services.crud.PageEntityCrudService;
+import searchengine.services.crud.SiteEntityCrudService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,8 @@ public class WebCrawlerService {
     private final SitesList sites;
     private final SiteEntityCrudService siteEntityCrudService;
     private final PageEntityCrudService pageEntityCrudService;
+    private final LemmaEntityCrudService lemmaEntityCrudService;
+    private final IndexCrudService indexCrudService;
 
 
     public boolean updateSiteIndex() {
@@ -30,28 +34,26 @@ public class WebCrawlerService {
         }
         LinkCollector.setIsStarted();
         List<Site> siteList = sites.getSites();
-        List<String> urls = siteList.stream().map(Site::getUrl).map(this::urlDeleteLastSlash).toList();
+        List<SiteDto> siteDtoList = siteList.stream()
+                .map(site -> new SiteDto( urlDeleteLastSlash(site.getUrl()),site.getName()))
+                .toList();
+        List<String> urls = siteList.stream().map(Site::getUrl).toList();
         siteEntityCrudService.deleteAllByListUrls(urls);
-        for(Site site: siteList) {
-            SiteEntity siteEntity = addSite(site);
-            LinkCollector linkCollector = new LinkCollector(site.getUrl(),site.getUrl(),
-                    pageEntityCrudService, siteEntityCrudService, siteEntity);
+        for(SiteDto siteDto: siteDtoList) {
+            siteDto.setStatus(Status.INDEXING);
+            siteDto.setStatusTime(LocalDateTime.now());
+            SiteDto createdSiteDto = siteEntityCrudService.create(siteDto);
+
+            PageDto pageDto = new PageDto();
+            pageDto.setSiteDto(createdSiteDto);
+            pageDto.setPath(siteDto.getUrl());
+            LinkCollector linkCollector = new LinkCollector(siteEntityCrudService,pageEntityCrudService,lemmaEntityCrudService,
+                    indexCrudService,pageDto);
             linkCollector.fork();
         }
         return true;
     }
 
-    private SiteEntity addSite(Site site) {
-        String url = urlDeleteLastSlash(site.getUrl());
-        url = urlDeleteLastSlash(url);
-        SiteEntity siteEntity = new SiteEntity();
-        siteEntity.setName(site.getName());
-        siteEntity.setUrl(url);
-        siteEntity.setStatus(Status.INDEXING);
-        siteEntity.setStatusTime(LocalDateTime.now());
-        siteEntityCrudService.create(siteEntity);
-        return siteEntity;
-    }
 
     private String urlDeleteLastSlash(String url) {
         return url.endsWith("/") ?

@@ -25,4 +25,5 @@ public class IndexEntity {
     @OneToOne
     @JoinColumn(name = "lemma_id")
     private LemmaEntity lemmaEntity;
+
 }

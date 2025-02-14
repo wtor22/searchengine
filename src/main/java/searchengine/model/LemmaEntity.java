@@ -23,4 +23,12 @@ public class LemmaEntity {
     private String lemma;
 
     private int frequency;
+
+    public LemmaEntity() {
+    }
+    public LemmaEntity(String lemma, int frequency, SiteEntity siteEntity) {
+        this.lemma = lemma;
+        this.frequency = frequency;
+        this.siteEntity = siteEntity;
+    }
 }
