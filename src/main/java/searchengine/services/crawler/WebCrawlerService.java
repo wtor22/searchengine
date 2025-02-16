@@ -3,6 +3,7 @@ package searchengine.services.crawler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import searchengine.config.JsoupConnect;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.dto.PageDto;
@@ -26,6 +27,8 @@ public class WebCrawlerService {
     private final PageEntityCrudService pageEntityCrudService;
     private final LemmaEntityCrudService lemmaEntityCrudService;
     private final IndexCrudService indexCrudService;
+    private final JsoupConnect jsoupConnect;
+
 
 
     public boolean updateSiteIndex() {
@@ -48,7 +51,7 @@ public class WebCrawlerService {
             pageDto.setSiteDto(createdSiteDto);
             pageDto.setPath(siteDto.getUrl());
             LinkCollector linkCollector = new LinkCollector(siteEntityCrudService,pageEntityCrudService,lemmaEntityCrudService,
-                    indexCrudService,pageDto);
+                    indexCrudService,pageDto, jsoupConnect);
             linkCollector.fork();
         }
         return true;

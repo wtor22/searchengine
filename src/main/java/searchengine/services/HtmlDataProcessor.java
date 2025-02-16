@@ -1,11 +1,16 @@
 package searchengine.services;
 
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
+import org.springframework.stereotype.Component;
+import searchengine.config.JsoupConnect;
 import searchengine.dto.IndexDto;
 import searchengine.dto.LemmaDto;
 import searchengine.dto.PageDto;
@@ -20,8 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
+@Component
+@RequiredArgsConstructor
 public class HtmlDataProcessor {
+    private final JsoupConnect jsoupConnect;
 
     public PageDto pageBuilder(PageDto pageDto) {
 
@@ -74,9 +81,8 @@ public class HtmlDataProcessor {
         while (attempts < replays) {
             try {
                 Connection.Response response = Jsoup.connect(path)
-                        //TODO Вынести в config
-                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                        .referrer("http://www.google.com")
+                        .userAgent(jsoupConnect.getUserAgent())
+                        .referrer(jsoupConnect.getReferrer())
                         .execute();
                 Document doc = response.parse();
                 return new CustomConnectResponse(response.statusCode(), response.statusMessage(),doc);

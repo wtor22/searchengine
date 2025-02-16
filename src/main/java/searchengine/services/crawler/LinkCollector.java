@@ -1,165 +1,127 @@
 package searchengine.services.crawler;
 
-import lombok.Getter;
-import org.jsoup.Connection;
-import org.jsoup.HttpStatusException;
-import org.jsoup.Jsoup;
-import org.jsoup.UnsupportedMimeTypeException;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import searchengine.dto.customResponses.CustomConnectResponse;
-import searchengine.model.PageEntity;
-import searchengine.model.SiteEntity;
-import searchengine.model.Status;
-import searchengine.services.crudServices.PageEntityCrudService;
-import searchengine.services.crudServices.SiteEntityCrudService;
+import org.springframework.transaction.annotation.Transactional;
+import searchengine.config.JsoupConnect;
+import searchengine.dto.IndexDto;
+import searchengine.dto.LemmaDto;
+import searchengine.dto.PageDto;
+import searchengine.dto.SiteDto;
+import searchengine.model.*;
+import searchengine.services.HtmlDataProcessor;
+import searchengine.services.crud.IndexCrudService;
+import searchengine.services.crud.LemmaEntityCrudService;
+import searchengine.services.crud.PageEntityCrudService;
+import searchengine.services.crud.SiteEntityCrudService;
 
-import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveAction;
-import java.util.stream.Collectors;
 
 
-@Getter
 public class LinkCollector extends RecursiveAction {
 
+    private final SiteEntityCrudService siteEntityCrudService;
+    private final PageEntityCrudService pageEntityCrudService;
+    private final LemmaEntityCrudService lemmaEntityCrudService;
+    private final IndexCrudService indexCrudService;
+    private final PageDto pageDto;
+    private final JsoupConnect jsoupConnect;
     private static volatile boolean isStopped = false;
 
-    private final String domain;
-    private String url;
-    private final PageEntityCrudService pageEntityCrudService;
-    private final SiteEntityCrudService siteEntityCrudService;
-    private final SiteEntity siteEntity;
 
-
-    LinkCollector(String url, String domain, PageEntityCrudService pageEntityCrudService,
-                  SiteEntityCrudService siteEntityCrudService, SiteEntity siteEntity) {
-        this.url = url;
-        this.domain = domain;
-        this.pageEntityCrudService = pageEntityCrudService;
-        this.siteEntity = siteEntity;
+    public LinkCollector(SiteEntityCrudService siteEntityCrudService, PageEntityCrudService pageEntityCrudService, LemmaEntityCrudService lemmaEntityCrudService, IndexCrudService indexCrudService, PageDto pageDto, JsoupConnect jsoupConnect) {
         this.siteEntityCrudService = siteEntityCrudService;
+        this.pageEntityCrudService = pageEntityCrudService;
+        this.lemmaEntityCrudService = lemmaEntityCrudService;
+        this.indexCrudService = indexCrudService;
+        this.pageDto = pageDto;
+        this.jsoupConnect = jsoupConnect;
     }
 
     @Override
     public void compute() {
-        String page = domain;
-        if(url.startsWith(domain) && !url.equals(domain)) url = url.replace(domain,"");
-        if(!url.startsWith(domain)) page = page.concat(url);
-        CustomConnectResponse response = htmlGetResponse(page);
-        PageEntity pageEntity = new PageEntity();
-        pageEntity.setPath(url.equals(domain) ?  "/" : url );
-        pageEntity.setCode(response.getStatusCode());
-        pageEntity.setSiteEntity(siteEntity);
+        HtmlDataProcessor htmlDataProcessor = new HtmlDataProcessor(jsoupConnect);
+        PageDto processedPageDto = htmlDataProcessor.pageBuilder(pageDto);
 
-        //TODO Реализовать все в методе получения response
-        if(String.valueOf(response.getStatusCode()).startsWith("4") ||
-                String.valueOf(response.getStatusCode()).startsWith("5")) {
-            pageEntity.setContent(String.valueOf(response.getStatusCode()));
-            pageEntityCrudService.create(pageEntity);
-            return;
-        } else if (response.getStatusCode() == 0){
-            pageEntity.setContent(String.valueOf(response.getStatusMessage()));
-            pageEntityCrudService.create(pageEntity);
-            return;
-        } else {
-            pageEntity.setContent(response.getDoc().body().html());
-        }
+        List<IndexDto> indexDtoList = htmlDataProcessor.listIndexesDtoBuilder(processedPageDto);
+        createAndSavePageData(indexDtoList,processedPageDto);
 
-        pageEntityCrudService.create(pageEntity);
-        siteEntity.setStatusTime(LocalDateTime.now());
-        siteEntityCrudService.update(siteEntity);
-        Elements linesParse = response.getDoc().select("body [href]:not(._disabled)");
-        List<String> listLinksOnPage = linesParse.stream()
-                .map(e -> e.attr("href"))
-                .filter(link -> link.startsWith("/") && !link.equals("/") &&
-                         !link.toLowerCase().contains(".jpg") && !link.toLowerCase().contains(".jpeg") &&
-                        !link.toLowerCase().contains(".png") && !link.toLowerCase().contains(".eps") &&
-                        !link.toLowerCase().contains(".svg") && !link.toLowerCase().contains(".pdf") &&
-                        !link.toLowerCase().contains(".xlsx") && !link.toLowerCase().contains(".xls") &&
-                        !link.toLowerCase().contains(".doc") && !link.toLowerCase().contains(".nc") &&
-                        !link.toLowerCase().contains(".zip") && !link.toLowerCase().contains(".dat")
-                )
-                .map(link -> link.endsWith("/") ?
-                        link.substring(0, link.length() - 1) : link)
-                .collect(Collectors.toList());
-
-        if (listLinksOnPage.isEmpty()) return;
-
-        List<String> existingInDataBaseLinks = pageEntityCrudService.getListExistingPath(listLinksOnPage, siteEntity);
-        listLinksOnPage.removeAll(existingInDataBaseLinks);
-
-        List<String> listLinksOnPageO = new CopyOnWriteArrayList<>(listLinksOnPage);
-        for (String link : listLinksOnPageO) {
-
+        List<String> listLinksOnPage = processedPageDto.getListLinks();
+        CopyOnWriteArrayList<String> checkedList = new CopyOnWriteArrayList<>(listLinksOnPage);
+        SiteDto siteDto = processedPageDto.getSiteDto();
+        for(String link : checkedList) {
             if(isStopped) {
-                siteEntity.setStatus(Status.FAILED);
-                siteEntity.setLastError("Индексация остановлена пользователем");
-                siteEntity.setStatusTime(LocalDateTime.now());
-                siteEntityCrudService.update(siteEntity);
+                stopIndex(pageDto);
                 return;
             }
-            List<String> existingInDataBaseLinksO = pageEntityCrudService.getListExistingPath(listLinksOnPageO, siteEntity);
-            listLinksOnPageO.removeAll(existingInDataBaseLinksO);
-            if(listLinksOnPageO.isEmpty())  break;
-
-            if(!listLinksOnPageO.contains(link)) continue;
-
-            LinkCollector linkCollector = new LinkCollector(link,domain,pageEntityCrudService,
-                    siteEntityCrudService,siteEntity);
+            checkedList.removeAll(checkExistsLink(checkedList,processedPageDto));
+            if(checkedList.isEmpty() || !checkedList.contains(link)) continue;
+            link = !link.startsWith(siteDto.getUrl()) ? siteDto.getUrl().concat(link) : link;
+            PageDto pageDtoToRecursive = new PageDto();
+            pageDtoToRecursive.setPath(link);
+            pageDtoToRecursive.setSiteDto(siteDto);
+            LinkCollector linkCollector = new LinkCollector(siteEntityCrudService,pageEntityCrudService,
+                    lemmaEntityCrudService, indexCrudService, pageDtoToRecursive, jsoupConnect);
             linkCollector.invoke();
         }
-        if (pageEntity.getPath().equals("/")) {
-            siteEntity.setStatus(Status.INDEXED);
-            siteEntityCrudService.update(siteEntity);
+        if(processedPageDto.getPath().equals("/")) {
+            setSiteStatusIndexed(processedPageDto);
         }
     }
+    private List<String> checkExistsLink(List<String> listLinks, PageDto pageDto) {
+        SiteEntity siteEntity = SiteEntityCrudService.mapTOEntity(pageDto.getSiteDto());
+        return pageEntityCrudService.getListExistingPath(listLinks, siteEntity);
+    }
+    private void createAndSavePageData(List<IndexDto> indexDtoList, PageDto pageDto) {
+        PageEntity pageEntity = PageEntityCrudService.mapToEntity(pageDto);
+        SiteEntity siteEntity = SiteEntityCrudService.mapTOEntity(pageDto.getSiteDto());
+        pageEntity.setSiteEntity(siteEntity);
 
-    private  CustomConnectResponse htmlGetResponse(String link) {
-        int attempts = 0;
-        int reties = 3;
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        while (attempts < reties) {
-            try {
-                Connection.Response response = Jsoup.connect(link)
-                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                        .referrer("http://www.google.com")
-                        .execute();
-                Document doc = response.parse();
-                return new CustomConnectResponse(response.statusCode(), response.statusMessage(),doc);
-            } catch (HttpStatusException se) {
-                return new CustomConnectResponse(se.getStatusCode(),se.getMessage(),null);
-            } catch (UnsupportedMimeTypeException me) {
-                System.err.println("Ссылка: " + link + "Неподдерживаемый MIME-тип: " + me.getMimeType());
-                return new CustomConnectResponse(0, "Неподдерживаемый MIME-тип:", null);
-            } catch (SocketTimeoutException ste) {
-                attempts ++;
-                if(attempts == reties) {
-                    System.err.println("Exception SocketTimeoutException for link : " + link + " message: " + ste.getMessage() + " попыток: " + attempts + " из: " + 3);
-                    return new CustomConnectResponse(0, "Таймаут соединения", null);
-                }
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {}
-            } catch (IOException ioe) {
-                attempts ++;
-                if(attempts == reties) {
-                    System.out.println("Exception: " + ioe.getMessage() + " попыток " + attempts  + " из " + 3);
-                    return new CustomConnectResponse(0,"Не удалось получить ответ сервера", null);
-                }
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {}
+        List<LemmaEntity> lemmaEntityList = new ArrayList<>();
+        List<IndexEntity> indexEntityList = new ArrayList<>();
+
+
+        for (IndexDto indexDto: indexDtoList) {
+            LemmaDto lemmaDto = indexDto.getLemmaDto();
+            LemmaEntity lemmaEntity = lemmaEntityCrudService.getLemmaEntityBySiteEntityAndLemma(siteEntity, lemmaDto.getLemma());
+            if(lemmaEntity == null) {
+                lemmaEntityList.add(new LemmaEntity(lemmaDto.getLemma(),lemmaDto.getFrequency(),siteEntity));
+            } else {
+                lemmaEntity.setFrequency(lemmaEntity.getFrequency() + 1);
+                lemmaEntityList.add(lemmaEntity);
             }
+            IndexEntity indexEntity = IndexCrudService.mapToEntity(indexDto);
+            indexEntity.setLemmaEntity(lemmaEntity);
+            indexEntity.setPageEntity(pageEntity);
+            indexEntityList.add(indexEntity);
         }
-        return new CustomConnectResponse(0,"Неизвестная ошибка", null);
+        saveData(pageEntity,indexEntityList,lemmaEntityList);
+    }
+    @Transactional
+    private void saveData(PageEntity pageEntity, List<IndexEntity> indexEntityList, List<LemmaEntity> lemmaEntityList) {
+
+        SiteEntity siteEntity = pageEntity.getSiteEntity();
+        siteEntity.setStatus(Status.INDEXING);
+        siteEntity.setStatusTime(LocalDateTime.now());
+        siteEntityCrudService.update(siteEntity);
+        pageEntityCrudService.create(pageEntity);
+        lemmaEntityCrudService.createOrUpdateAll(lemmaEntityList);
+        indexCrudService.createAll(indexEntityList);
+
+    }
+    private void setSiteStatusIndexed(PageDto pageDto) {
+        SiteEntity siteEntity = SiteEntityCrudService.mapTOEntity(pageDto.getSiteDto());
+        siteEntity.setStatus(Status.INDEXED);
+        siteEntity.setStatusTime(LocalDateTime.now());
+        siteEntityCrudService.update(siteEntity);
+    }
+    public void stopIndex(PageDto pageDto) {
+        SiteEntity siteEntity = SiteEntityCrudService.mapTOEntity(pageDto.getSiteDto());
+        siteEntity.setStatus(Status.FAILED);
+        siteEntity.setLastError("Индексация остановлена пользователем");
+        siteEntity.setStatusTime(LocalDateTime.now());
+        siteEntityCrudService.update(siteEntity);
     }
     public static boolean setIsStopped() {
         if(isStopped) return false;

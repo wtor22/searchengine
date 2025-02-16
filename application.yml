@@ -1,6 +1,5 @@
 server:
   port: 8080
-
 spring:
   datasource:
     username: user
@@ -20,6 +19,10 @@ spring:
 #    org.hibernate.orm.jdbc.bind: TRACE
 #    org.hibernate.orm.jdbc.extract: TRACE
 #    org.springframework.jdbc.datasource: DEBUG
+
+jsoup-connect:
+  userAgent: Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6
+  referrer: http://www.google.com
 
 indexing-settings:
   sites:
