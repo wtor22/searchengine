@@ -17,6 +17,9 @@ public class IndexCrudService {
     public void createAll(List<IndexEntity> indexEntityList) {
         indexRepository.saveAll(indexEntityList);
     }
+    public void create(IndexEntity indexEntity) {
+        indexRepository.save(indexEntity);
+    }
 
     public static IndexEntity mapToEntity(IndexDto indexDto) {
 

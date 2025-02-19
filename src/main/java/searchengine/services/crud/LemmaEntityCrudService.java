@@ -16,6 +16,9 @@ public class LemmaEntityCrudService {
 
     private final LemmaEntityRepository lemmaEntityRepository;
 
+    public LemmaEntity create(LemmaEntity lemma) {
+        return lemmaEntityRepository.save(lemma);
+    }
     public void createOrUpdateAll(List<LemmaEntity> lemmaEntityList) {
         lemmaEntityRepository.saveAll(lemmaEntityList);
     }

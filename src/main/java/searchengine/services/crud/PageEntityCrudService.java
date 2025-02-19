@@ -22,6 +22,10 @@ public class PageEntityCrudService {
     public List<String> getListExistingPath(List<String> paths, SiteEntity siteEntity) {
         return pageEntityRepository.findByPathAndSiteEntity(paths, siteEntity);
     }
+    public void isPageExistsDelete(String url, SiteEntity siteEntity) {
+        PageEntity pageEntity = pageEntityRepository.findByPathAndSiteEntity(url, siteEntity);
+        if(pageEntity != null) pageEntityRepository.delete(pageEntity);
+    }
 
     public void deleteAllByListSiteEntity(List<SiteEntity> siteEntities) {
         pageEntityRepository.deleteAllBySiteEntityIn(siteEntities);

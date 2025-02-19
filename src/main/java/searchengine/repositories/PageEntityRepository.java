@@ -15,4 +15,6 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Integer>
     List<String> findByPathAndSiteEntity(List<String> paths, SiteEntity siteEntity);
 
     void deleteAllBySiteEntityIn(List<SiteEntity> siteEntities);
+
+    PageEntity findByPathAndSiteEntity(String path, SiteEntity siteEntity);
 }

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Setter
 @Getter
@@ -13,7 +14,7 @@ public class IndexEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "`rank`")
     private float rank;
@@ -22,7 +23,7 @@ public class IndexEntity {
     @JoinColumn(name = "page_id")
     private PageEntity pageEntity;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "lemma_id")
     private LemmaEntity lemmaEntity;
 

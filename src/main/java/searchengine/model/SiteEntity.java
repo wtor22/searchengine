@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Setter
@@ -15,7 +17,7 @@ public class SiteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -32,5 +34,11 @@ public class SiteEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PageEntity> pageEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "siteEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<LemmaEntity> lemmaEntityList = new ArrayList<>();
 
 }

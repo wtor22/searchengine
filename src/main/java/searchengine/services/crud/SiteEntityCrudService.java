@@ -9,6 +9,7 @@ import searchengine.model.Status;
 import searchengine.repositories.SiteEntityRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,24 @@ public class SiteEntityCrudService {
             return siteDto;
         }
         return null;
+    }
+    public void createEnt(SiteEntity siteEntity) {
+        siteEntityRepository.save(siteEntity);
+    }
+    public SiteDto getDtoByUrl(String url) {
+        SiteEntity siteEntity = siteEntityRepository.findByUrl(url);
+        if(siteEntity == null) return null;
+        return mapToDto(siteEntity);
+    }
+    public SiteEntity getByUrl(String url) {
+        return siteEntityRepository.findByUrl(url);
+    }
+    public Optional<SiteEntity> getById(int id) {
+        return siteEntityRepository.findById(id);
+    }
+
+    public boolean existsByUrl(String url) {
+        return siteEntityRepository.existsByUrl(url);
     }
     public boolean existsByStatus(Status status) {
         return siteEntityRepository.existsByStatus(status);
@@ -56,5 +75,14 @@ public class SiteEntityCrudService {
         return siteEntity;
     }
 
-
+    public static SiteDto mapToDto(SiteEntity siteEntity) {
+        SiteDto siteDto = new SiteDto();
+        siteDto.setId(siteEntity.getId());
+        siteDto.setName(siteEntity.getName());
+        siteDto.setUrl(siteEntity.getUrl());
+        siteDto.setLastError(siteEntity.getLastError());
+        siteDto.setStatus(siteEntity.getStatus());
+        siteDto.setStatusTime(siteEntity.getStatusTime());
+        return siteDto;
+    }
 }

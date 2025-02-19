@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -16,11 +18,7 @@ public class PageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private int id;
-
-    @ManyToOne
-    @JoinColumn(name = "site_id", nullable = false)
-    private SiteEntity siteEntity;
+    private Integer id;
 
     @Column(length = 500, nullable = false)
     private String path;
@@ -28,6 +26,13 @@ public class PageEntity {
     @Column(nullable = false)
     private Integer code;
 
-    @Column(columnDefinition = "MEDIUMTEXT" ,nullable = false)
+    @Column(columnDefinition = "MEDIUMTEXT" , nullable = false)
     private String content;
+
+    @ManyToOne
+    @JoinColumn(name = "site_id", nullable = false)
+    private SiteEntity siteEntity;
+
+    @OneToMany(mappedBy = "pageEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<IndexEntity> indexEntityList = new ArrayList<>();
 }

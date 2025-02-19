@@ -1,7 +1,6 @@
-package searchengine.services;
+package searchengine.services.crawler;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
@@ -9,13 +8,14 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import searchengine.config.JsoupConnect;
 import searchengine.dto.IndexDto;
 import searchengine.dto.LemmaDto;
 import searchengine.dto.PageDto;
 import searchengine.dto.SiteDto;
 import searchengine.dto.customResponses.CustomConnectResponse;
+import searchengine.services.crud.SiteEntityCrudService;
 import searchengine.services.lemma.LemmaFinder;
 
 import java.io.IOException;
@@ -28,12 +28,22 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class HtmlDataProcessor {
-    private final JsoupConnect jsoupConnect;
+    private final SiteEntityCrudService siteEntityCrudService;
+    private final DataPageStorage dataPageStorage;
 
-    public PageDto pageBuilder(PageDto pageDto) {
+    @Value("${jsoup-connect.userAgent}")
+    String userAgent;
+    @Value("${jsoup-connect.referrer}")
+    String referrer;
 
-        String url = pageDto.getPath();
+
+    public PageDto pageBuilder(String url) {
+        SiteDto siteDto = getSiteDto(url);
         CustomConnectResponse response = fetchHtml(url);
+        PageDto pageDto = new PageDto();
+        pageDto.setPath(url);
+
+        pageDto.setSiteDto(siteDto);
         pageDto.setCode(response.getStatusCode());
         if(String.valueOf(response.getStatusCode()).startsWith("4") ||
                 String.valueOf(response.getStatusCode()).startsWith("5") ||
@@ -44,12 +54,14 @@ public class HtmlDataProcessor {
             pageDto.setContent(response.getDoc().body().html());
             pageDto.setListLinks(listStringParser(response));
         }
+
         // Если ссылка это домен
         if(pageDto.getSiteDto().getUrl().equals(pageDto.getPath())) {
             pageDto.setPath("/");
         }
         if(pageDto.getPath().startsWith(pageDto.getSiteDto().getUrl()))
             pageDto.setPath(pageDto.getPath().replace(pageDto.getSiteDto().getUrl(),""));
+        dataPageStorage.isPageExistsDelete(pageDto.getPath(), siteDto);
         return pageDto;
     }
 
@@ -81,8 +93,8 @@ public class HtmlDataProcessor {
         while (attempts < replays) {
             try {
                 Connection.Response response = Jsoup.connect(path)
-                        .userAgent(jsoupConnect.getUserAgent())
-                        .referrer(jsoupConnect.getReferrer())
+                        .userAgent(userAgent)
+                        .referrer(referrer)
                         .execute();
                 Document doc = response.parse();
                 return new CustomConnectResponse(response.statusCode(), response.statusMessage(),doc);
@@ -129,5 +141,12 @@ public class HtmlDataProcessor {
             indexDtoList.add(indexDto);
         }
         return indexDtoList;
+    }
+
+    SiteDto getSiteDto(String url) {
+        if (!url.trim().matches("https?://.*")) return null;
+        String[] array = url.trim().split("/");
+        String domain = array[0].concat("//").concat(array[2]);
+        return siteEntityCrudService.getDtoByUrl(domain);
     }
 }

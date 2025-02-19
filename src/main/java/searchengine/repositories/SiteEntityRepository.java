@@ -16,4 +16,5 @@ public interface SiteEntityRepository extends JpaRepository<SiteEntity, Integer>
     void deleteByUrlIn(List<String> urls);
 
     boolean existsByStatus(Status status);
+    boolean existsByUrl(String url);
 }

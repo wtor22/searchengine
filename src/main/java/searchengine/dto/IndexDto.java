@@ -9,4 +9,14 @@ public class IndexDto {
     private float rank;
     private PageDto pageDto;
     private LemmaDto lemmaDto;
+
+    @Override
+    public String toString() {
+        return "IndexDto{" +
+                "id=" + id +
+                ", rank=" + rank +
+                ", pageDto=  RFR"  +
+                ", lemmaDto=" + lemmaDto +
+                '}';
+    }
 }
