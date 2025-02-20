@@ -24,7 +24,7 @@ public class StarterRecursiveCrawler {
 
     public boolean startSiteIndex() {
 
-        if ( siteEntityCrudService.existsByStatus(Status.INDEXING))return false;
+        if (siteEntityCrudService.existsByStatus(Status.INDEXING)) return false;
         List<Site> siteList = sites.getSites();
         List<SiteDto> siteDtoList = siteList.stream()
                 .map(site -> new SiteDto(urlDeleteLastSlash(site.getUrl()),site.getName()))

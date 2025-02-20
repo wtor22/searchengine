@@ -36,14 +36,16 @@ public class HtmlDataProcessor {
     @Value("${jsoup-connect.referrer}")
     String referrer;
 
-
     public PageDto pageBuilder(String url) {
         SiteDto siteDto = getSiteDto(url);
         CustomConnectResponse response = fetchHtml(url);
         PageDto pageDto = new PageDto();
-        pageDto.setPath(url);
-
         pageDto.setSiteDto(siteDto);
+        if(siteDto.getUrl().equals(url)) {
+            pageDto.setPath("/");
+        } else {
+            pageDto.setPath(url.replace(siteDto.getUrl(),""));
+        }
         pageDto.setCode(response.getStatusCode());
         if(String.valueOf(response.getStatusCode()).startsWith("4") ||
                 String.valueOf(response.getStatusCode()).startsWith("5") ||
@@ -54,13 +56,6 @@ public class HtmlDataProcessor {
             pageDto.setContent(response.getDoc().body().html());
             pageDto.setListLinks(listStringParser(response));
         }
-
-        // Если ссылка это домен
-        if(pageDto.getSiteDto().getUrl().equals(pageDto.getPath())) {
-            pageDto.setPath("/");
-        }
-        if(pageDto.getPath().startsWith(pageDto.getSiteDto().getUrl()))
-            pageDto.setPath(pageDto.getPath().replace(pageDto.getSiteDto().getUrl(),""));
         dataPageStorage.isPageExistsDelete(pageDto.getPath(), siteDto);
         return pageDto;
     }

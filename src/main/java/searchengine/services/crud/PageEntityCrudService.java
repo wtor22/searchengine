@@ -3,6 +3,7 @@ package searchengine.services.crud;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.PageDto;
+import searchengine.dto.SiteDto;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.repositories.PageEntityRepository;
@@ -17,6 +18,12 @@ public class PageEntityCrudService {
 
     public void create(PageEntity pageEntity) {
         pageEntityRepository.save(pageEntity);
+    }
+    public PageEntity getPageEntity(String path, SiteEntity siteEntity){
+        return pageEntityRepository.findByPathAndSiteEntity(path, siteEntity);
+    }
+    public int getCountPages(SiteEntity siteEntity) {
+        return pageEntityRepository.countBySiteEntity(siteEntity);
     }
 
     public List<String> getListExistingPath(List<String> paths, SiteEntity siteEntity) {

@@ -40,12 +40,9 @@ public class ApiController {
 
     @PostMapping("/indexPage")
     public ResponseEntity<CrawlerResponse> indexPage(@RequestParam String url) {
-
-
         if(singlePageCrawler.startPageIndex(url)) {
             return ResponseEntity.ok().body(new CrawlerResponse(true));
         }
-
         return ResponseEntity.badRequest().body(new CrawlerResponse(false, "Данная страница находится за пределами сайтов, \n" +
                 "указанных в конфигурационном файле\n"));
     }

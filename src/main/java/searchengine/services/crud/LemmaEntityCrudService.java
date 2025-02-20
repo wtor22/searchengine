@@ -19,7 +19,10 @@ public class LemmaEntityCrudService {
     public LemmaEntity create(LemmaEntity lemma) {
         return lemmaEntityRepository.save(lemma);
     }
-    public void createOrUpdateAll(List<LemmaEntity> lemmaEntityList) {
+    public void deleteAll(List<LemmaEntity> lemmaEntityList) {
+        lemmaEntityRepository.deleteAll(lemmaEntityList);
+    }
+    public void updateAll(List<LemmaEntity> lemmaEntityList) {
         lemmaEntityRepository.saveAll(lemmaEntityList);
     }
     public LemmaEntity getLemmaEntityBySiteEntityAndLemma(SiteEntity siteEntity, String lemma) {
@@ -28,12 +31,10 @@ public class LemmaEntityCrudService {
     }
 
     public static LemmaEntity mapToEntity(LemmaDto lemmaDto) {
-
         LemmaEntity lemmaEntity = new LemmaEntity();
         lemmaEntity.setId(lemmaDto.getId());
         lemmaEntity.setLemma(lemmaDto.getLemma());
         lemmaEntity.setFrequency(lemmaDto.getFrequency());
-
         return lemmaEntity;
     }
 }

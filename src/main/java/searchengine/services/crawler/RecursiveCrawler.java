@@ -9,19 +9,23 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveAction;
 
-
 @RequiredArgsConstructor
 public class RecursiveCrawler extends RecursiveAction {
 
     private final String url;
     private final HtmlDataProcessor htmlDataProcessor;
     private final DataPageStorage dataPageStorage;
-    private static volatile boolean isStopped = false;
+    public static volatile boolean isStopped = false;
 
     @Override
     public void compute() {
         PageDto pageDto = htmlDataProcessor.pageBuilder(url);
 
+        if (pageDto.getPath().equals("/") && !pageDto.getCode().toString().startsWith("2")) {
+
+            dataPageStorage.setSiteErrorHomePage(pageDto);
+            return;
+        }
         List<IndexDto> indexDtoList = htmlDataProcessor.listIndexesDtoBuilder(pageDto);
         dataPageStorage.storageData(indexDtoList,pageDto);
         List<String> listLinksOnPage = pageDto.getListLinks();
@@ -40,7 +44,7 @@ public class RecursiveCrawler extends RecursiveAction {
             linkCollector.invoke();
         }
         if(pageDto.getPath().equals("/")) {
-            dataPageStorage.setSiteStatusIndexed(pageDto);
+            dataPageStorage.setStatusIndexed(pageDto.getSiteDto());
         }
     }
 

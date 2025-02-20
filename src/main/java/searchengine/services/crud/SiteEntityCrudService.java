@@ -19,17 +19,16 @@ public class SiteEntityCrudService {
     private final PageEntityCrudService pageEntityCrudService;
 
 
-    public SiteDto create(SiteDto siteDto) {
+    public void create(SiteDto siteDto) {
         SiteEntity existSiteEntity = siteEntityRepository.findByUrl(siteDto.getUrl());
         if(existSiteEntity == null) {
             SiteEntity siteEntity = siteEntityRepository.save(mapTOEntity(siteDto));
             siteDto.setId(siteEntity.getId());
-            return siteDto;
         }
-        return null;
     }
-    public void createEnt(SiteEntity siteEntity) {
-        siteEntityRepository.save(siteEntity);
+    public List<SiteDto> getAllDto(){
+        List<SiteEntity> siteEntityList = siteEntityRepository.findAll();
+        return siteEntityList.stream().map(SiteEntityCrudService::mapToDto).toList();
     }
     public SiteDto getDtoByUrl(String url) {
         SiteEntity siteEntity = siteEntityRepository.findByUrl(url);
@@ -55,11 +54,14 @@ public class SiteEntityCrudService {
         siteEntity.setId(oldSiteEntity.getId());
         siteEntityRepository.save(siteEntity);
     }
+    public int getCountPages(SiteDto siteDto) {
+        return pageEntityCrudService.getCountPages(mapTOEntity(siteDto));
+    }
 
     @Transactional
     public void deleteAllByListUrls(List<String> listUrls) {
-        List<SiteEntity> siteEntities = siteEntityRepository.findByUrlIn(listUrls);
-        pageEntityCrudService.deleteAllByListSiteEntity(siteEntities);
+        //List<SiteEntity> siteEntities = siteEntityRepository.findByUrlIn(listUrls);
+        //pageEntityCrudService.deleteAllByListSiteEntity(siteEntities);
         siteEntityRepository.deleteByUrlIn(listUrls);
     }
 
