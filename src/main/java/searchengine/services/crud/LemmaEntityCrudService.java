@@ -30,6 +30,12 @@ public class LemmaEntityCrudService {
         return optionalLemmaEntity.orElse(null);
     }
 
+    public LemmaEntity getLemmaEntityByLemma(String lemma) {
+        Optional<LemmaEntity> optionalLemmaEntity = lemmaEntityRepository.findByLemma(lemma);
+        return optionalLemmaEntity.orElse(null);
+    }
+
+
     public static LemmaEntity mapToEntity(LemmaDto lemmaDto) {
         LemmaEntity lemmaEntity = new LemmaEntity();
         lemmaEntity.setId(lemmaDto.getId());

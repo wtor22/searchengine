@@ -1,8 +1,10 @@
 package searchengine.dto.customResponses;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class CrawlerResponse {
     private boolean result;
     private String error;

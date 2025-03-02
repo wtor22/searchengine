@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.customResponses.CrawlerResponse;
+import searchengine.dto.customResponses.searchResponse.SearchResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.StatisticsService;
 import searchengine.services.crawler.RecursiveCrawler;
 import searchengine.services.crawler.SinglePageCrawler;
 import searchengine.services.crawler.StarterRecursiveCrawler;
+import searchengine.services.search.SearchRelevanceCalculator;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +20,7 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final StarterRecursiveCrawler starterRecursiveCrawler;
     private final SinglePageCrawler singlePageCrawler;
+    private final SearchRelevanceCalculator searchRelevanceCalculator;
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -45,5 +48,14 @@ public class ApiController {
         }
         return ResponseEntity.badRequest().body(new CrawlerResponse(false, "Данная страница находится за пределами сайтов, \n" +
                 "указанных в конфигурационном файле\n"));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchResponse> indexAge(@RequestParam String query, @RequestParam int offset, @RequestParam int limit, @RequestParam String site) {
+
+        System.out.println("Query " + query + " Offset " + offset + " Limit " + limit + " Site " + site);
+        //return searchRelevanceCalculator.calculatorRelevance(query);
+        return ResponseEntity.ok().body(searchRelevanceCalculator.calculatorRelevance(query));
+
     }
 }

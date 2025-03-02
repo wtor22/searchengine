@@ -49,6 +49,8 @@ public class DataPageStorage {
             pageEntity.getIndexEntityList().add(indexEntity);
         }
         pageEntityCrudService.create(pageEntity);
+        siteEntity.setStatusTime(LocalDateTime.now());
+        siteEntityCrudService.update(siteEntity);
     }
 
     public void stopIndex(PageDto pageDto) {

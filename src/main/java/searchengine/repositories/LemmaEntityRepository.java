@@ -15,4 +15,5 @@ public interface LemmaEntityRepository extends JpaRepository<LemmaEntity, Intege
     Optional<LemmaEntity> findById(Integer integer);
 
     Optional<LemmaEntity> findBySiteEntityAndLemma(SiteEntity siteEntity, String lemma);
+    Optional<LemmaEntity> findByLemma(String lemma);
 }

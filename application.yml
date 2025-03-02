@@ -11,7 +11,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: false
 #logging:
 #  level:
@@ -34,9 +34,9 @@ indexing-settings:
 #      name: Ipfran.Ru
 #    - url: https://www.svetlovka.ru/
 #      name: Светловка.Ру
-    - url: http://nhghfdkf.by
-      name: стремный сайт
+#    - url: http://nhghfdkf.by
+#      name: стремный сайт
     - url: https://mpolymer.by
       name: МПолимер
-    - url: https://constantaclinic.com/
-      name: КонстантаКлиник
+#    - url: https://constantaclinic.com/
+#      name: КонстантаКлиник

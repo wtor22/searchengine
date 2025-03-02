@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class HtmlDataProcessor {
     private final SiteEntityCrudService siteEntityCrudService;
     private final DataPageStorage dataPageStorage;
+    private final LemmaFinder lemmaFinder;
 
     @Value("${jsoup-connect.userAgent}")
     String userAgent;
@@ -53,7 +54,7 @@ public class HtmlDataProcessor {
             pageDto.setContent(String.valueOf(response.getStatusMessage()));
             return pageDto;
         } else {
-            pageDto.setContent(response.getDoc().body().html());
+            pageDto.setContent(response.getDoc().html());
             pageDto.setListLinks(listStringParser(response));
         }
         dataPageStorage.isPageExistsDelete(pageDto.getPath(), siteDto);
@@ -90,6 +91,7 @@ public class HtmlDataProcessor {
                 Connection.Response response = Jsoup.connect(path)
                         .userAgent(userAgent)
                         .referrer(referrer)
+                        .timeout(5000)
                         .execute();
                 Document doc = response.parse();
                 return new CustomConnectResponse(response.statusCode(), response.statusMessage(),doc);
@@ -122,7 +124,7 @@ public class HtmlDataProcessor {
     }
 
     public List<IndexDto> listIndexesDtoBuilder(PageDto pageDto) {
-        LemmaFinder lemmaFinder = LemmaFinder.getInstance();
+        //LemmaFinder lemmaFinder = LemmaFinder.getInstance();
         Map<String, Integer> mapLemmas = lemmaFinder.collectLemmas(pageDto.getContent());
         SiteDto siteDto = pageDto.getSiteDto();
         List<IndexDto> indexDtoList = new ArrayList<>();

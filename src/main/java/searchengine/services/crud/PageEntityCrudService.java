@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.PageDto;
 import searchengine.dto.SiteDto;
+import searchengine.model.IndexEntity;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.repositories.PageEntityRepository;
@@ -32,10 +33,6 @@ public class PageEntityCrudService {
     public void isPageExistsDelete(String url, SiteEntity siteEntity) {
         PageEntity pageEntity = pageEntityRepository.findByPathAndSiteEntity(url, siteEntity);
         if(pageEntity != null) pageEntityRepository.delete(pageEntity);
-    }
-
-    public void deleteAllByListSiteEntity(List<SiteEntity> siteEntities) {
-        pageEntityRepository.deleteAllBySiteEntityIn(siteEntities);
     }
 
     public static PageEntity mapToEntity(PageDto pageDto) {

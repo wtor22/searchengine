@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.IndexDto;
 import searchengine.model.IndexEntity;
+import searchengine.model.LemmaEntity;
 import searchengine.repositories.IndexRepository;
 
 import java.util.List;
@@ -19,6 +20,10 @@ public class IndexCrudService {
     }
     public void create(IndexEntity indexEntity) {
         indexRepository.save(indexEntity);
+    }
+
+    public List<IndexEntity> getAllByLemmaEntity(LemmaEntity lemmaEntity) {
+        return indexRepository.findAllByLemmaEntity(lemmaEntity);
     }
 
     public static IndexEntity mapToEntity(IndexDto indexDto) {
