@@ -29,6 +29,8 @@ public class PageEntity {
     @Column(columnDefinition = "MEDIUMTEXT" , nullable = false)
     private String content;
 
+    private String title;
+
     @ManyToOne
     @JoinColumn(name = "site_id", nullable = false)
     private SiteEntity siteEntity;

@@ -12,5 +12,6 @@ public class PageDto {
     private String path;
     private Integer code;
     private String content;
+    private String title;
     private List<String> listLinks;
 }

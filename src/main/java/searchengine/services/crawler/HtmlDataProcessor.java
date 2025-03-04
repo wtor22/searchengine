@@ -55,6 +55,7 @@ public class HtmlDataProcessor {
             return pageDto;
         } else {
             pageDto.setContent(response.getDoc().html());
+            pageDto.setTitle(response.getDoc().title());
             pageDto.setListLinks(listStringParser(response));
         }
         dataPageStorage.isPageExistsDelete(pageDto.getPath(), siteDto);
@@ -91,19 +92,17 @@ public class HtmlDataProcessor {
                 Connection.Response response = Jsoup.connect(path)
                         .userAgent(userAgent)
                         .referrer(referrer)
-                        .timeout(5000)
+                        .timeout(10000)
                         .execute();
                 Document doc = response.parse();
                 return new CustomConnectResponse(response.statusCode(), response.statusMessage(),doc);
             } catch (HttpStatusException se) {
                 return new CustomConnectResponse(se.getStatusCode(),se.getMessage(),null);
             } catch (UnsupportedMimeTypeException me) {
-                System.err.println("Ссылка: " + path + "Неподдерживаемый MIME-тип: " + me.getMimeType());
                 return new CustomConnectResponse(0, "Неподдерживаемый MIME-тип:", null);
             } catch (SocketTimeoutException ste) {
                 attempts ++;
                 if(attempts == replays) {
-                    System.err.println("Exception SocketTimeoutException for link : " + path + " message: " + ste.getMessage() + " попыток: " + attempts + " из: " + 3);
                     return new CustomConnectResponse(0, "Таймаут соединения", null);
                 }
                 try {
@@ -112,7 +111,6 @@ public class HtmlDataProcessor {
             } catch (IOException ioe) {
                 attempts ++;
                 if(attempts == replays) {
-                    System.out.println("Exception: " + ioe.getMessage() + " попыток " + attempts  + " из " + 3);
                     return new CustomConnectResponse(0,"Не удалось получить ответ сервера", null);
                 }
                 try {
@@ -124,7 +122,6 @@ public class HtmlDataProcessor {
     }
 
     public List<IndexDto> listIndexesDtoBuilder(PageDto pageDto) {
-        //LemmaFinder lemmaFinder = LemmaFinder.getInstance();
         Map<String, Integer> mapLemmas = lemmaFinder.collectLemmas(pageDto.getContent());
         SiteDto siteDto = pageDto.getSiteDto();
         List<IndexDto> indexDtoList = new ArrayList<>();

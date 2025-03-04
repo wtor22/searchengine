@@ -10,7 +10,7 @@ import searchengine.services.StatisticsService;
 import searchengine.services.crawler.RecursiveCrawler;
 import searchengine.services.crawler.SinglePageCrawler;
 import searchengine.services.crawler.StarterRecursiveCrawler;
-import searchengine.services.search.SearchRelevanceCalculator;
+import searchengine.services.search.SearchService;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final StarterRecursiveCrawler starterRecursiveCrawler;
     private final SinglePageCrawler singlePageCrawler;
-    private final SearchRelevanceCalculator searchRelevanceCalculator;
+    private final SearchService searchRelevanceCalculator;
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
@@ -51,11 +51,11 @@ public class ApiController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<SearchResponse> indexAge(@RequestParam String query, @RequestParam int offset, @RequestParam int limit, @RequestParam String site) {
+    public ResponseEntity<SearchResponse> indexAge(@RequestParam String query,
+                                                   @RequestParam int offset,
+                                                   @RequestParam(defaultValue = "20") int limit,
+                                                   @RequestParam(required = false) String site) {
 
-        System.out.println("Query " + query + " Offset " + offset + " Limit " + limit + " Site " + site);
-        //return searchRelevanceCalculator.calculatorRelevance(query);
-        return ResponseEntity.ok().body(searchRelevanceCalculator.calculatorRelevance(query));
-
+        return ResponseEntity.ok().body(searchRelevanceCalculator.calculatorRelevance(query, limit, offset, site));
     }
 }

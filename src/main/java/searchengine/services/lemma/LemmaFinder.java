@@ -12,7 +12,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LemmaFinder {
     private final LuceneMorphology luceneMorphology;
-    private static final String WORD_TYPE_REGEX = "\\W\\w&&[^а-яА-Я\\s]";
     private static final String[] particlesNames = new String[]{"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 
     public Map<String, Integer> collectLemmas(String text) {
@@ -20,6 +19,7 @@ public class LemmaFinder {
         HashMap<String, Integer> lemmas = new HashMap<>();
         for (String word : words) {
             String normalWord = getNormalForm(word);
+            if (normalWord == null) continue;
             if (lemmas.containsKey(normalWord)) {
                 lemmas.put(normalWord, lemmas.get(normalWord) + 1);
             } else {
@@ -58,7 +58,7 @@ public class LemmaFinder {
     }
 
     public String[] arrayContainsRussianWords(String text) {
-        return text.toLowerCase(Locale.ROOT)
+        return text.toLowerCase()
                 .replaceAll("([^а-я\\s])", " ")
                 .trim()
                 .split("\\s+");

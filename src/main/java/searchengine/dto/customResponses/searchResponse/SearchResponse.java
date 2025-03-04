@@ -9,4 +9,5 @@ public class SearchResponse {
     private boolean result;
     private int count;
     private List<SearchData> data;
+    private String error;
 }

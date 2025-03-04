@@ -41,6 +41,7 @@ public class PageEntityCrudService {
         pageEntity.setPath(pageDto.getPath());
         pageEntity.setCode(pageDto.getCode());
         pageEntity.setContent(pageDto.getContent());
+        pageEntity.setTitle(pageDto.getTitle());
 
         return pageEntity;
     }

@@ -30,8 +30,11 @@ public class LemmaEntityCrudService {
         return optionalLemmaEntity.orElse(null);
     }
 
-    public LemmaEntity getLemmaEntityByLemma(String lemma) {
-        Optional<LemmaEntity> optionalLemmaEntity = lemmaEntityRepository.findByLemma(lemma);
+    public List<LemmaEntity> getLemmaEntityByLemma(String lemma) {
+        return lemmaEntityRepository.findAllByLemma(lemma);
+    }
+    public LemmaEntity getLemmaEntityByLemmaAndSiteUrl(String lemma, SiteEntity siteEntity){
+        Optional<LemmaEntity> optionalLemmaEntity = lemmaEntityRepository.findBySiteEntityAndLemma(siteEntity, lemma);
         return optionalLemmaEntity.orElse(null);
     }
 
