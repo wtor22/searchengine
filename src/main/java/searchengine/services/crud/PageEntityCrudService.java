@@ -3,8 +3,6 @@ package searchengine.services.crud;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import searchengine.dto.PageDto;
-import searchengine.dto.SiteDto;
-import searchengine.model.IndexEntity;
 import searchengine.model.PageEntity;
 import searchengine.model.SiteEntity;
 import searchengine.repositories.PageEntityRepository;

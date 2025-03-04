@@ -17,16 +17,6 @@ public class IndexCrudService {
     private final IndexRepository indexRepository;
     private final SiteEntityCrudService siteEntityCrudService;
 
-    public void createAll(List<IndexEntity> indexEntityList) {
-        indexRepository.saveAll(indexEntityList);
-    }
-    public void create(IndexEntity indexEntity) {
-        indexRepository.save(indexEntity);
-    }
-
-    public List<IndexEntity> getAllByLemmaEntity(LemmaEntity lemmaEntity) {
-        return indexRepository.findAllByLemmaEntity(lemmaEntity);
-    }
     public List<IndexEntity> getAllByLemmaEntityAndSiteUrl(LemmaEntity lemmaEntity, String siteUrl) {
         if(siteUrl == null || siteUrl.isEmpty()) return indexRepository.findAllByLemmaEntity(lemmaEntity);
         SiteEntity siteEntity = siteEntityCrudService.getByUrl(siteUrl);

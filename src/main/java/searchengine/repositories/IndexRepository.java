@@ -9,8 +9,8 @@ import searchengine.model.SiteEntity;
 import java.util.List;
 
 public interface IndexRepository extends JpaRepository<IndexEntity, Integer> {
-    public List<IndexEntity> findAllByLemmaEntity(LemmaEntity lemmaEntity);
+    List<IndexEntity> findAllByLemmaEntity(LemmaEntity lemmaEntity);
 
     @Query("SELECT i From IndexEntity i JOIN i.pageEntity p WHERE p.siteEntity = :siteEntity AND i.lemmaEntity = :lemmaEntity")
-    public List<IndexEntity> findAllByLemmaEntityAndSiteEntity(LemmaEntity lemmaEntity, SiteEntity siteEntity);
+    List<IndexEntity> findAllByLemmaEntityAndSiteEntity(LemmaEntity lemmaEntity, SiteEntity siteEntity);
 }
