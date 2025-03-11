@@ -14,7 +14,6 @@
 - **Java 17**  
 - **Spring Boot**  
 - **Spring Data JPA**  
-- **Hibernate**  
 - **MySQL**  
 - **Lombok**  
 - **Jsoup (для парсинга HTML)**
