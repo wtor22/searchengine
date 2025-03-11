@@ -22,5 +22,5 @@
 ## Запуск проекта
 1. Клонировать репозиторий:  
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/ywtor22/searchengine.git
    cd your-repo
