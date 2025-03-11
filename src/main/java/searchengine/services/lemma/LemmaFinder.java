@@ -12,6 +12,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class LemmaFinder {
     private final LuceneMorphology luceneMorphology;
+
     private static final String[] particlesNames = new String[]{"МЕЖД", "ПРЕДЛ", "СОЮЗ"};
 
     public Map<String, Integer> collectLemmas(String text) {

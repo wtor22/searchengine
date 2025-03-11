@@ -1,0 +1,3 @@
+CREATE USER 'user'@'%' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON search_engine.* TO 'user'@'%';
+FLUSH PRIVILEGES;

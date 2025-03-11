@@ -1,10 +1,12 @@
 package searchengine.dto.customResponses.searchResponse;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 public class SearchResponse {
     private boolean result;
     private int count;

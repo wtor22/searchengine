@@ -42,6 +42,9 @@ public class StarterRecursiveCrawler {
         }
         return true;
     }
+    public boolean stopSiteIndexing() {
+        return RecursiveCrawler.setIsStopped();
+    }
 
     private String urlDeleteLastSlash(String url) {
         return url.endsWith("/") ?

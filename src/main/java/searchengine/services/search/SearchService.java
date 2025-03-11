@@ -37,7 +37,7 @@ public class SearchService {
         }
         List<LemmaEntity> lemmasSortedList = getSortedListLemmas(query, siteEntity);
 
-        if (query.isEmpty()) {
+        if (query.isBlank()) {
             SearchResponse errorResponse  = new SearchResponse();
             errorResponse.setResult(false);
             errorResponse.setError("Задан пустой поисковый запрос");
@@ -127,7 +127,6 @@ public class SearchService {
         for (LemmaEntity lemmaEntity : lemmasSortedList) {
             List<IndexEntity> indexesList = indexCrudService.getAllByLemmaEntityAndSiteUrl(lemmaEntity, siteUrl);
             indexEntityList.addAll(indexesList);
-
         }
         CopyOnWriteArrayList<PageEntity> pageEntityList = indexEntityList.stream()
                 .map(IndexEntity::getPageEntity)
@@ -169,7 +168,7 @@ public class SearchService {
                 .toList();
     }
 
-    public String generateSnippet(String content, List<String> lemmas) {
+    private String generateSnippet(String content, List<String> lemmas) {
         String[] words = lemmaFinder.arrayContainsRussianWords(content);
         int maxMatches = 0;
         int maxUniqueLemmas = 0;

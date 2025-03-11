@@ -1,16 +1,19 @@
 package searchengine.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.customResponses.CrawlerResponse;
 import searchengine.dto.customResponses.searchResponse.SearchResponse;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.services.StatisticsService;
-import searchengine.services.crawler.RecursiveCrawler;
 import searchengine.services.crawler.SinglePageCrawler;
 import searchengine.services.crawler.StarterRecursiveCrawler;
 import searchengine.services.search.SearchService;
+
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,11 +23,20 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final StarterRecursiveCrawler starterRecursiveCrawler;
     private final SinglePageCrawler singlePageCrawler;
-    private final SearchService searchRelevanceCalculator;
+    private final SearchService searchService;
 
     @GetMapping("/statistics")
-    public ResponseEntity<StatisticsResponse> statistics() {
-        return ResponseEntity.ok(statisticsService.getStatistics());
+    public ResponseEntity<?> statistics() {
+        try {
+            StatisticsResponse response = statisticsService.getStatistics();
+            return ResponseEntity.ok(response);
+        } catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("result", false,"error", "Ошибка доступа к базе данных"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("result", false,"error", "Непредвиденная ошибка"));
+        }
     }
 
     @GetMapping("/startIndexing")
@@ -37,7 +49,7 @@ public class ApiController {
 
     @GetMapping("/stopIndexing")
     public ResponseEntity<CrawlerResponse> stopIndexing() {
-        if(RecursiveCrawler.setIsStopped()) return ResponseEntity.ok().body(new CrawlerResponse(true));
+        if(starterRecursiveCrawler.stopSiteIndexing()) return ResponseEntity.ok().body(new CrawlerResponse(true));
         return ResponseEntity.badRequest().body(new CrawlerResponse(false, "Индексация не запущена"));
     }
 
@@ -46,8 +58,8 @@ public class ApiController {
         if(singlePageCrawler.startPageIndex(url)) {
             return ResponseEntity.ok().body(new CrawlerResponse(true));
         }
-        return ResponseEntity.badRequest().body(new CrawlerResponse(false, "Данная страница находится за пределами сайтов, \n" +
-                "указанных в конфигурационном файле\n"));
+        return ResponseEntity.badRequest().body(new CrawlerResponse(false, "Данная страница находится за пределами сайтов, " +
+                "указанных в конфигурационном файле"));
     }
 
     @GetMapping("/search")
@@ -56,6 +68,11 @@ public class ApiController {
                                                    @RequestParam(defaultValue = "20") int limit,
                                                    @RequestParam(required = false) String site) {
 
-        return ResponseEntity.ok().body(searchRelevanceCalculator.calculatorRelevance(query, limit, offset, site));
+        SearchResponse searchResponse = searchService.calculatorRelevance(query, limit, offset, site);
+        if(!searchResponse.isResult()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(searchResponse);
+        }
+        return ResponseEntity.ok().body(searchService.calculatorRelevance(query, limit, offset, site));
     }
+
 }
