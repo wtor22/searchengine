@@ -39,6 +39,5 @@
   ```bash
   docker-compose up -d --build
 5. Для остановки контейнера выполнить команду в папке проекта
-  ```bash
-  docker-compose down
-   
+   ```bash
+   docker-compose down
