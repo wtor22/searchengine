@@ -19,14 +19,12 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.1</version>
         <relativePath/>
     </parent>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -76,55 +74,40 @@
             <version>5.3.1</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>dictionary-reader</artifactId>
             <version>1.5</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/dictionary-reader-1.5.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>english</artifactId>
             <version>1.5</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/english-1.5.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>russian</artifactId>
             <version>1.5</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/russian-1.5.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>
             <version>8.11.0</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/lucene-analyzers-common-8.11.0.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
             <version>8.11.0</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/lucene-core-8.11.0.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>morph</artifactId>
             <version>1.5</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/morph-1.5.jar</systemPath>-->
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>morphology</artifactId>
             <version>1.5</version>
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${project.basedir}/libs/morphology-1.5.jar</systemPath>-->
         </dependency>
     </dependencies>
 
@@ -159,5 +142,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
